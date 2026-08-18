@@ -1,0 +1,31 @@
+/*
+ * Copyright (c) 2025 Ekkodale GmbH. All rights reserved.
+ *
+ * This file is part of the gaeco platform system.
+ *
+ * Use of this file is governed by the terms of the license
+ * in LICENSE.md at the root of this repository.
+ * Unauthorized copying, modification, distribution, or use of this file,
+ * via any medium, is strictly prohibited except as expressly permitted
+ * under that license.
+ */
+
+@import 'tailwindcss';
+
+@theme {
+	--color-primary: var(--app-color-primary);
+	--color-secondary: var(--app-color-secondary);
+	--color-light: var(--app-color-light);
+	--color-none-background: #f0f0f0;
+	--color-none-text: #858585;
+	--color-read-background: #edf7ed;
+	--color-read-text: #408944;
+	--color-write-background: #e5f6fd;
+	--color-write-text: #1893d6;
+	--color-project-module-background: #eeeeee;
+	--color-chip-property-number: #e0f2f1;
+	--color-card-chip-right-none: #eeeeee;
+	--color-card-chip-right-read: #dce775;
+	--color-card-chip-right-write: #b3e5fc;
+	--color-card-chip-right-mixed: #c8e6b8;
+}

@@ -1,0 +1,134 @@
+# Copyright (c) 2025 Ekkodale GmbH. All rights reserved.
+#
+# This file is part of the gaeco platform system.
+#
+# Use of this file is governed by the terms of the license
+# in LICENSE.md at the root of this repository.
+# Unauthorized copying, modification, distribution, or use of this file,
+# via any medium, is strictly prohibited except as expressly permitted
+# under that license.
+
+services:
+  access-postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: ${ACCESS_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${ACCESS_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${ACCESS_POSTGRES_DATABASE}
+    expose:
+      - 5432
+    volumes:
+      # Long "type: bind" form so `docker compose config --no-path-resolution` keeps
+      # the ${VOLUME_BASE_PATH} source intact (short form gets mis-typed as a volume).
+      - type: bind
+        source: ${VOLUME_BASE_PATH}/access/postgres/
+        target: /var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-h",
+          "127.0.0.1",
+          "-d",
+          "${ACCESS_POSTGRES_DATABASE}",
+          "-U",
+          "${ACCESS_POSTGRES_USER}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 50
+      start_period: 30s
+
+  access-server:
+    image: ${IMAGE_BASE_PATH}/access-server:${ACCESS_SERVER_TAG}
+    expose:
+      - 80
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      Postgres__Host: access-postgres
+      Postgres__Port: 5432
+      Postgres__User: ${ACCESS_POSTGRES_USER}
+      Postgres__Password: ${ACCESS_POSTGRES_PASSWORD}
+      Postgres__Database: ${ACCESS_POSTGRES_DATABASE}
+      Keycloak__ServerUrl: https://${KEYCLOAK_SERVER_HOSTNAME}
+      Keycloak__Realm: ${KEYCLOAK_REALM}
+      Keycloak__ClientId: ${KEYCLOAK_CLIENT_ID}
+      Keycloak__ClientSecret: ${KEYCLOAK_CLIENT_SECRET}
+      Kafka__Address: ${KAFKA_ADDRESS}
+      Kafka__ConsumerGroup: ${KAFKA_CONSUMER_GROUP_ACCESS}
+      Kafka__AutoOffsetReset: ${KAFKA_AUTO_OFFSET_RESET}
+      Kafka__SessionTimeoutMs: ${KAFKA_SESSION_TIMEOUT_MS}
+      Kafka__MaxPollIntervalMs: ${KAFKA_MAX_POLL_INTERVAL_MS}
+      Kafka__Topics__AccessRights: ${KAFKA_TOPICS_ACCESSRIGHTS}
+      Kafka__Topics__Usergroups: ${KAFKA_TOPICS_USERGROUPS}
+      Kafka__Topics__Guidelines: ${KAFKA_TOPICS_GUIDELINES}
+      Kafka__Topics__UseCaseGuidelines: ${KAFKA_TOPICS_USECASEGUIDELINES}
+      GuidelineService__Address: https://${GUIDELINE_SERVER_HOSTNAME}
+      Minio__Address: ${MINIO_ADDRESS}
+      Minio__AccessKey: ${MINIO_ROOT_USER}
+      Minio__SecretKey: ${MINIO_ROOT_PASSWORD}
+      OpenTelemetry__OtlpEndpoint: ${OTLP_ENDPOINT}
+      UseCaseGuideline__BucketName: ${MINIO_USECASEGUIDELINE_BUCKET}
+    networks:
+      - internal
+      - gaeco-network
+      - traefik-proxy
+    depends_on:
+      access-postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "exec 3<>/dev/tcp/localhost/80 && echo -e 'GET /health HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 50
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-proxy"
+      - "traefik.http.routers.${STACK_NAME}-server.rule=Host(`${ACCESS_SERVER_HOSTNAME}`)"
+      - "traefik.http.routers.${STACK_NAME}-server.entrypoints=https"
+      - "traefik.http.routers.${STACK_NAME}-server.tls.certresolver=letsencrypt"
+      - "traefik.http.services.${STACK_NAME}-server.loadbalancer.server.port=80"
+
+  access-client:
+    image: ${IMAGE_BASE_PATH}/access-client:${ACCESS_CLIENT_TAG}
+    expose:
+      - 80
+    environment:
+      VITE_ACCESS_SERVICE_API_URL: https://${ACCESS_SERVER_HOSTNAME}
+      VITE_GUIDELINE_SERVICE_API_URL: https://${GUIDELINE_SERVER_HOSTNAME}
+      VITE_USECASE_SERVICE_API_URL: https://${USECASE_SERVER_HOSTNAME}
+      VITE_KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+      VITE_ADMIN_ROLE_NAME: ${ADMIN_ROLE_NAME}
+      VITE_MOUNT_PATH: ${MOUNT_ROUTE}
+    depends_on:
+      access-server:
+        condition: service_healthy
+    networks:
+      - gaeco-network
+    labels:
+      "app.mfe.id": "app-access"
+      "app.mfe.displayName": "Access Rights"
+      "app.mfe.description": "Access Rights Application"
+      "app.mfe.iconPath": "/Access.svg"
+      "app.mfe.entrypointPath": "/assets/remoteEntry.js"
+      "app.mfe.exposedModule": "App"
+      "app.mfe.route": "${MOUNT_ROUTE}"
+
+networks:
+  internal:
+  gaeco-network:
+    name: ${ENVIRONMENT_NETWORK}
+    external: true
+  traefik-proxy:
+    name: ${TRAEFIK_NETWORK}
+    external: true

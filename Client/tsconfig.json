@@ -1,0 +1,85 @@
+{
+  "compilerOptions": {
+    // Where TypeScript stores incremental build info
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
+    // Do not emit output files (used for type-checking only)
+    "noEmit": true,
+
+    // --- Language & Module ---
+    // Set the JavaScript language version for emitted code.
+    // 'ES2021' = ECMAScript 2021 features only. 'ESNext' = always latest ECMAScript features (may include proposals).
+    "target": "ES2021",
+    // Set the module system for output. 'ESNext' = always latest module syntax (dynamic import, etc.).
+    "module": "ESNext",
+    // List of library files to include in the compilation.
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
+    // Enable the new JSX transform for React 17+
+    "jsx": "react-jsx",
+    // Use modern module resolution (for bundlers like Vite, Webpack)
+    "moduleResolution": "bundler",
+    // Path alias for cleaner imports (e.g. import x from '@/foo')
+    // Since TypeScript 5.0, 'baseUrl' is no longer required for 'paths'
+    "paths": {
+      "@/*": ["./src/*"],
+      "@api/*": ["./src/api/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@shared/*": ["./src/features/shared/*"]
+    },
+
+    // --- Strictness & Type Safety ---
+    // Enable all strict type-checking options
+    "strict": true,
+    // Disallow variables with implicit 'any' type
+    "noImplicitAny": true,
+    // Disallow 'this' with an implicit 'any' type
+    "noImplicitThis": true,
+    // Parse files in strict mode and emit 'use strict' for each file
+    "alwaysStrict": true,
+    // Enable strict null checks (null/undefined are only assignable to themselves)
+    "strictNullChecks": true,
+    // Check function parameter bivariance strictly
+    "strictFunctionTypes": true,
+    // Check bind, call, and apply methods strictly
+    "strictBindCallApply": true,
+    // Ensure class properties are initialized in the constructor
+    "strictPropertyInitialization": true,
+    // Use 'unknown' instead of 'any' for catch variables
+    "useUnknownInCatchVariables": true,
+
+    // --- Linting & Clean Code ---
+    // Report errors on unused local variables
+    "noUnusedLocals": true,
+    // Report errors on unused function parameters
+    "noUnusedParameters": true,
+    // Report error when not all code paths in function return a value
+    "noImplicitReturns": true,
+    // Report errors for fallthrough cases in switch statements
+    "noFallthroughCasesInSwitch": true,
+    // Require 'override' modifier when overriding methods
+    "noImplicitOverride": true,
+    // Disallow property access via index signature if not declared
+    "noPropertyAccessFromIndexSignature": true,
+
+    // --- Interop & Imports ---
+    // Enables emit interoperability between CommonJS and ES Modules
+    "esModuleInterop": true,
+    // Allow default imports from modules with no default export
+    "allowSyntheticDefaultImports": true,
+    // Allow importing .json files as modules
+    "resolveJsonModule": true,
+    // Allow importing TypeScript extension files
+    "allowImportingTsExtensions": true,
+    // Ensure each file can be safely transpiled independently
+    "isolatedModules": true,
+
+    // --- Performance & Checks ---
+    // Skip type checking of declaration files (*.d.ts) for faster builds
+    "skipLibCheck": true,
+    // Ensure file name casing is consistent across the project
+    "forceConsistentCasingInFileNames": true,
+    // Use the new class fields transform (aligns with JS proposal)
+    "useDefineForClassFields": true
+  },
+  // Files to include in the project
+  "include": ["src", "vite.config.ts", "env.d.ts"]
+}

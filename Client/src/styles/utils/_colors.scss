@@ -1,0 +1,35 @@
+/*
+ * Copyright (c) 2025 Ekkodale GmbH. All rights reserved.
+ *
+ * This file is part of the gaeco platform system.
+ *
+ * Use of this file is governed by the terms of the license
+ * in LICENSE.md at the root of this repository.
+ * Unauthorized copying, modification, distribution, or use of this file,
+ * via any medium, is strictly prohibited except as expressly permitted
+ * under that license.
+ */
+
+//General colors
+$white: #ffffff;
+
+//Property Dialog
+$none-background: #f0f0f0;
+$none-text: #858585;
+
+$read-background: #edf7ed;
+$read-text: #408944;
+
+$write-background: #e5f6fd;
+$write-text: #1893d6;
+
+//Project Overview
+$project-module-background: #eeeeee;
+
+//Project Card
+$chip-property-number: #e0f2f1;
+
+$card-chip-right-none: #eeeeee;
+$card-chip-right-read: #dce775;
+$card-chip-right-write: #b3e5fc;
+$card-chip-right-mixed: linear-gradient(135deg, $card-chip-right-read, $card-chip-right-write);
